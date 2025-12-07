@@ -11,5 +11,5 @@
     sh.stderr.pipe(client);
   });
 
-  return a;
+  return true;
 })();
